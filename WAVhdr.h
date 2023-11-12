@@ -53,6 +53,8 @@
 
 
 #define WAVHDR_LEN 44
+#define WAVHDR_FMT_PCM 1
+
 
 #define WAVHDR_POS_CHUNKID        0  
 #define WAVHDR_POS_CHUNKSIZE      4  
@@ -90,17 +92,21 @@ typedef struct WAVhdr_t {
   uint32_t byteRate;
   uint16_t blockAlign;
   uint16_t bitsPerSample;
+  uint32_t chunkSize;
+  uint32_t dataSize;
 };
 
 
 class WAVhdr {
   private:
     uint8_t wBuf[WAVHDR_LEN];
+    WAVhdr_t wHdr;
 
     uint32_t getVal(uint8_t pos, uint8_t len);
   
   public:
     uint8_t *getBuffer();
+    WAVhdr_t getData();
     int processBuffer();
 };
 
