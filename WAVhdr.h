@@ -53,6 +53,7 @@
 
 
 #define WAVHDR_LEN 44
+#define WAVHDR_MIN 36
 #define WAVHDR_FMT_PCM 1
 
 
@@ -85,6 +86,8 @@
 #define WAVHDR_SIZE_SUBCHUNK2SIZE  4 
 
 
+typedef size_t (*readCallBack)(uint8_t*, size_t);
+
 typedef struct WAVhdr_t {
   uint16_t audioFormat;
   uint16_t numChannels;
@@ -93,6 +96,7 @@ typedef struct WAVhdr_t {
   uint16_t blockAlign;
   uint16_t bitsPerSample;
   uint32_t chunkSize;
+  uint32_t dataPos;
   uint32_t dataSize;
 };
 
@@ -108,9 +112,8 @@ class WAVhdr {
     uint8_t *getBuffer();
     WAVhdr_t getData();
     int processBuffer();
+    int processBuffer(readCallBack);
 };
-
-
 
 
 #endif
