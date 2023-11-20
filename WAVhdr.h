@@ -107,12 +107,15 @@ class WAVhdr {
     WAVhdr_t wHdr;
 
     uint32_t getVal(uint8_t pos, uint8_t len);
+    void putVal(uint8_t pos, uint8_t len, uint32_t data);
   
   public:
     uint8_t *getBuffer();
     WAVhdr_t getData();
     int processBuffer();
-    int processBuffer(readCallBack);
+    int processBuffer(readCallBack callBack);
+    int createBuffer(uint16_t sampleRate, uint8_t numChannels, uint8_t bitsPerSample);
+    int finalizeBuffer(uint32_t dataLen);
 };
 
 

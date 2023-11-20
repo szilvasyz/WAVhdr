@@ -55,6 +55,14 @@ uint32_t WAVhdr::getVal(uint8_t pos, uint8_t len) {
 }
 
 
+void WAVhdr::putVal(uint8_t pos, uint8_t len, uint32_t data) {
+  for (int c = 0; c < len; c++) {
+    wBuf[pos + c] = data & 0xFF;
+    data >>= 8;
+  }
+}
+
+
 uint8_t *WAVhdr::getBuffer() {
   return wBuf;
 }
@@ -142,5 +150,31 @@ int WAVhdr::processBuffer(readCallBack callBack) {
       (wHdr.sampleRate    < 8000 )) {
         return false;
       }
+  return true;
+}
+
+
+int WAVhdr::createBuffer(uint16_t sampleRate, uint8_t numChannels, uint8_t bitsPerSample) {
+  putVal(WAVHDR_POS_CHUNKID      ,WAVHDR_SIZE_CHUNKID      , 0x46464952    );
+  putVal(WAVHDR_POS_FORMAT       ,WAVHDR_SIZE_FORMAT       , 0x45564157    );
+  putVal(WAVHDR_POS_SUBCHUNK1ID  ,WAVHDR_SIZE_SUBCHUNK1ID  , 0x20746d66    );
+  putVal(WAVHDR_POS_SUBCHUNK1SIZE,WAVHDR_SIZE_SUBCHUNK1SIZE, 16            );
+  putVal(WAVHDR_POS_SUBCHUNK2ID  ,WAVHDR_SIZE_SUBCHUNK2ID  , 0x61746164    );
+  putVal(WAVHDR_POS_SUBCHUNK2SIZE,WAVHDR_SIZE_SUBCHUNK2SIZE, 0             );
+
+  putVal(WAVHDR_POS_AUDIOFORMAT  ,WAVHDR_SIZE_AUDIOFORMAT  , WAVHDR_FMT_PCM);
+  putVal(WAVHDR_POS_NUMCHANNELS  ,WAVHDR_SIZE_NUMCHANNELS  , numChannels);
+  putVal(WAVHDR_POS_SAMPLERATE   ,WAVHDR_SIZE_SAMPLERATE   , sampleRate);
+  putVal(WAVHDR_POS_BYTERATE     ,WAVHDR_SIZE_BYTERATE     , (sampleRate * bitsPerSample * numChannels) / 8);
+  putVal(WAVHDR_POS_BLOCKALIGN   ,WAVHDR_SIZE_BLOCKALIGN   , (bitsPerSample * numChannels) / 8);
+  putVal(WAVHDR_POS_BITSPERSAMPLE,WAVHDR_SIZE_BITSPERSAMPLE, bitsPerSample);
+  putVal(WAVHDR_POS_CHUNKSIZE    ,WAVHDR_SIZE_CHUNKSIZE    , WAVHDR_LEN - 8);
+  return true;
+}
+
+
+int WAVhdr::finalizeBuffer(uint32_t dataLen) {
+  putVal(WAVHDR_POS_CHUNKSIZE    ,WAVHDR_SIZE_CHUNKSIZE    , dataLen + WAVHDR_LEN - 8);
+  putVal(WAVHDR_POS_SUBCHUNK2SIZE,WAVHDR_SIZE_SUBCHUNK2SIZE, dataLen);
   return true;
 }
